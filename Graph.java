@@ -1,12 +1,12 @@
-public class Graph{
+public class Graph{ // Graph implementation
 
-	public int [][] adjacencyMatrix;
-	public int [][] timeToTravel;
-	public GraphNode [] vertices;
-	public int size;
-	public int currSize = 0;
+	public int [][] adjacencyMatrix; // edge weights in miles
+	public int [][] timeToTravel; // edge weights in minutes
+	public GraphNode [] vertices; // array of all Graph Nodes/vertices
+	public int size; // total size 
+	public int currSize = 0; // used only when constructing the graph
 
-	public class GraphNode{
+	public class GraphNode{ // graph node stores city and state data of a vertice
 
 		private String city, state;
 

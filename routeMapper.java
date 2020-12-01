@@ -4,8 +4,8 @@ import java.lang.*;
 
 public class RouteMapper{
 
-	Graph routeMap;
-	Map<String, String[]> attractions = new HashMap<String, String[]>();
+	private Graph routeMap;
+	private Map<String, String[]> attractions = new HashMap<String, String[]>();
 
 	public RouteMapper(File attractions, File roads, int size){
 		routeMap = new Graph(size);
@@ -14,7 +14,7 @@ public class RouteMapper{
 		initAttractions(attractions);
 	}
 
-	public void initGraph(File roads){
+	private void initGraph(File roads){ // adds all the cities + states to nodes in graph
 		Set<String[]> cityTracker = new HashSet<String[]>();
 		BufferedReader csvReader;
 		try{
@@ -58,7 +58,7 @@ public class RouteMapper{
 		}
 	}
 
-	public void initGraphEdges(File roads){
+	private void initGraphEdges(File roads){ // initializes the edge weights for all nodes
 		BufferedReader csvReader;
 		try{
 			csvReader = new BufferedReader(new FileReader(roads));
@@ -93,7 +93,7 @@ public class RouteMapper{
 		
 	}
 
-	public void initAttractions(File attractions){
+	private void initAttractions(File attractions){ // maps attractions to corresponding location in a hashmap
 		BufferedReader csvReader;
 		try{
 			csvReader = new BufferedReader(new FileReader(attractions));
@@ -120,8 +120,8 @@ public class RouteMapper{
 		}
 	}
 
-	public List<String> route(String startingCity, String startingState, String endingCity, String endingState, List<String> attractions){
-		List<String> route;
+	public List<String> route(String startingCity, String startingState, String endingCity, String endingState, List<String> attractions){ //constructs a queue of all locations needed to be visited in order and passes
+		List<String> route;																												// it on to shortestPath()
 		Queue<String> routeQueue = new LinkedList<String>();
 		routeQueue.add(startingCity + " " + startingState);
 		for(int i = 0; i < attractions.size(); i ++){
@@ -129,13 +129,14 @@ public class RouteMapper{
 			routeQueue.add(location[0] + " " + location[1]);
 		}
 		routeQueue.add(endingCity + " " + endingState);
-		route = shortestPath(routeQueue);
+		route = shortestPath(routeQueue); 
 		return route;
 
 	}
 
-	public List<String> shortestPath(Queue<String> routeQueue){
-		List<String> route = new ArrayList<String>();
+	private List<String> shortestPath(Queue<String> routeQueue){ // calls dijkstras on locations in queue, two at a time 
+		List<String> route = new ArrayList<String>(); // get an array "parents" that can be used to trace back the path taken on shortest path
+														// construct a new queue of all those trace backs 
 		
 
 		int [] parents;
@@ -157,7 +158,7 @@ public class RouteMapper{
 		return route;
 	}
 
-	public void walkParents(Queue<String> s, int end, int [] parents){
+	private void walkParents(Queue<String> s, int end, int [] parents){ // function used to recursively walk an array of parents and adds them to a queue
 		if(end == -1)
 			return;
 		walkParents(s, parents[end], parents);
@@ -165,7 +166,7 @@ public class RouteMapper{
 
 	}
 
-	private int leastCostUnknownVertex(int [] dist, boolean [] visited){
+	private int leastCostUnknownVertex(int [] dist, boolean [] visited){ // utility method for dijkstras to find the least cost unknown vertex 
 		int min = Integer.MAX_VALUE, min_index = -1; 
   
         for (int v = 0; v < dist.length; v++) 
@@ -176,7 +177,7 @@ public class RouteMapper{
         return min_index;
 	}
 
-	public int [] dijkstras(int source, int ending){
+	private int [] dijkstras(int source, int ending){ // dijkstras algorithm, but stops once you hit the ending index
 
 		int [][] adjacencyMatrix = this.routeMap.adjacencyMatrix;
 		int size = this.routeMap.size();
@@ -216,7 +217,7 @@ public class RouteMapper{
 
 	
 
-	public void printRoute(List<String> route){
+	public void printRoute(List<String> route){ //printing the route in a nice format
 		System.out.println("Route:");
 		System.out.println(route.get(0));
 		for(int i = 1; i < route.size(); i ++){
@@ -256,6 +257,7 @@ public class RouteMapper{
 		}
 		RouteMapper r = new RouteMapper(attractions, roads, size);
 
+		//inputs can be changed here
 		List<String> a = new ArrayList<String>();
 		a.add("Alcatraz");
 		a.add("Disney World");
