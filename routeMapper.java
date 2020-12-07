@@ -122,32 +122,39 @@ public class RouteMapper{
 
 	public List<String> route(String startingCity, String startingState, String endingCity, String endingState, List<String> attractions){ //constructs a queue of all locations needed to be visited in order and passes
 		List<String> route;																												// it on to shortestPath()
-		Queue<String> routeQueue = new LinkedList<String>();
-		routeQueue.add(startingCity + " " + startingState);
+		
+		HashMap<Integer, String> h = new HashMap<Integer, String>();
+		int startingIndex = routeMap.getIndex(startingCity + " " + startingState);
+
 		for(int i = 0; i < attractions.size(); i ++){
 			String [] location = this.attractions.get(attractions.get(i));
-			routeQueue.add(location[0] + " " + location[1]);
+			String locationString = location[0] + " " + location[1];
+			int index = routeMap.getIndex(locationString);
+			h.put(index, locationString);
 		}
-		routeQueue.add(endingCity + " " + endingState);
-		route = shortestPath(routeQueue); 
+		int endingIndex = routeMap.getIndex(endingCity + " " + endingState);
+		h.put(endingIndex, endingCity + " " + endingState);
+		
+		route = shortestPath(startingIndex, h); 
 		return route;
 
 	}
 
-	private List<String> shortestPath(Queue<String> routeQueue){ // calls dijkstras on locations in queue, two at a time 
+	private List<String> shortestPath(int start, HashMap<Integer, String> attractions){ // calls dijkstras on locations in queue, two at a time 
 		List<String> route = new ArrayList<String>(); // get an array "parents" that can be used to trace back the path taken on shortest path
 														// construct a new queue of all those trace backs 
 		
 
-		int [] parents;
+		int [] parents = new int[routeMap.size];
 
 		Queue<String> s = new LinkedList<String>();
+		int startingIndex = start;
 
-		while(routeQueue.size() > 1){
-			String start = routeQueue.remove();
-			int startingIndex = this.routeMap.getIndex(start);
-			int endingIndex = this.routeMap.getIndex(routeQueue.peek());
-			parents = dijkstras(startingIndex, endingIndex);
+
+		while(!attractions.isEmpty()){
+			Pair p = dijkstras(startingIndex, parents, attractions);
+			int endingIndex = p.getIndex();
+			parents = p.getParents();
 			walkParents(s, endingIndex, parents);
 		}
 
@@ -161,6 +168,7 @@ public class RouteMapper{
 	private void walkParents(Queue<String> s, int end, int [] parents){ // function used to recursively walk an array of parents and adds them to a queue
 		if(end == -1)
 			return;
+
 		walkParents(s, parents[end], parents);
 		s.add(this.routeMap.vertices[end].get());
 
@@ -177,7 +185,7 @@ public class RouteMapper{
         return min_index;
 	}
 
-	private int [] dijkstras(int source, int ending){ // dijkstras algorithm, but stops once you hit the ending index
+	private Pair dijkstras(int source, int [] parents, HashMap<Integer, String> attractions){ // dijkstras algorithm, but stops once you hit the ending index
 
 		int [][] adjacencyMatrix = this.routeMap.adjacencyMatrix;
 		int size = this.routeMap.size();
@@ -191,11 +199,12 @@ public class RouteMapper{
 		}
 
 		sDists[source] = 0;
-		int [] parents = new int[size];
+		parents = new int[size];
 		parents[source] = -1;
+		int l = -1;
 		
 		for(int i = 0; i < size; i++){
-			int l = leastCostUnknownVertex(sDists, visited);
+			l = leastCostUnknownVertex(sDists, visited);
 			if(l == -1)
 				break;
 			int sDist = sDists[l];
@@ -208,11 +217,14 @@ public class RouteMapper{
 					sDists[v] = sDist + weight;
 				}
 			}
-			if(l == ending)
+			if(attractions.containsKey(l)){
+				System.out.println(attractions.get(l));
+				attractions.remove(l);
 				break;
+			}
 		}
 
-		return parents;
+		return new Pair(l, parents);
 	}
 
 	
