@@ -120,7 +120,7 @@ public class RouteMapper{
 		}
 	}
 
-	public List<String> route(String startingCity, String startingState, String endingCity, String endingState, List<String> attractions){ //constructs a queue of all locations needed to be visited in order and passes
+	public List<String> route(String startingCity, String startingState, String endingCity, String endingState, List<String> attractions){ //constructs a hashmap of all locations needed to be visited and passes
 		List<String> route;																												// it on to shortestPath()
 		
 		HashMap<Integer, String> h = new HashMap<Integer, String>();
@@ -140,8 +140,8 @@ public class RouteMapper{
 
 	}
 
-	private List<String> shortestPath(int start, HashMap<Integer, String> attractions){ // calls dijkstras on locations in queue, two at a time 
-		List<String> route = new ArrayList<String>(); // get an array "parents" that can be used to trace back the path taken on shortest path
+	private List<String> shortestPath(int start, HashMap<Integer, String> attractions){ // calls dijkstras on locations in hashmap 
+			List<String> route = new ArrayList<String>(); // get an array "parents" that can be used to trace back the path taken on shortest path to next destination
 														// construct a new queue of all those trace backs 
 		
 
@@ -185,7 +185,7 @@ public class RouteMapper{
         return min_index;
 	}
 
-	private Pair dijkstras(int source, int [] parents, HashMap<Integer, String> attractions){ // dijkstras algorithm, but stops once you hit the ending index
+	private Pair dijkstras(int source, int [] parents, HashMap<Integer, String> attractions){ // dijkstras algorithm, but stops once you hit an attraction that is contained in the hashmap and removes it from the hashmap
 
 		int [][] adjacencyMatrix = this.routeMap.adjacencyMatrix;
 		int size = this.routeMap.size();
